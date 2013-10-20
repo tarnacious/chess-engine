@@ -64,6 +64,9 @@ capturedKing :: PieceColor -> Board -> Move -> Bool
 capturedKing c b m = case Extend.makeMove c b m of
     (c', b') -> winningState c (c', b')
 
+isCheckmate :: PieceColor -> Board -> Bool
+isCheckmate c b = canCaptureKing (oppositeColor c) b (genColorMoves (oppositeColor(c), b))
+
 prettyTurn :: PieceColor -> String
 prettyTurn White = "White"
 prettyTurn Black = "Black"
