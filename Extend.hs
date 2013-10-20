@@ -2,6 +2,8 @@ module Extend where
 import Data.Char
 import Board
 import Moves
+import Minimax
+import Evaluator
 
 prettyPiece::Piece->String
 prettyPiece (Piece a f) = show f ++ show a ++ " "
@@ -41,9 +43,26 @@ genColorMoves (c, b) = concat [[(piece,pos,z)|z<-genPieceMoves b pos piece]|(pie
 
 type Move = (Piece, Pos, Pos)
 
-makeMove::PieceColor -> Board -> Move -> (PieceColor, Board, [Move])
+makeMove::PieceColor -> Board -> Move -> (PieceColor, Board)
 makeMove c b (v,from,to) =
-    ((oppositeColor c), movePos from to b, genColorMoves ((oppositeColor c), (movePos from to b)))
+    ((oppositeColor c), movePos from to b)
+
+genLegalMoves :: (PieceColor, Board) -> [Move]
+genLegalMoves (c, b) = filter (isLegalMove c b) (genColorMoves (c, b))
+
+isLegalMove :: PieceColor -> Board -> Move -> Bool
+isLegalMove c b m = case Extend.makeMove c b m of
+    (c', b') -> (canCaptureKing c' b' (genColorMoves (c', b'))) == False
+
+canCaptureKing :: PieceColor -> Board -> [Move] -> Bool
+canCaptureKing c b [] = False
+canCaptureKing c b (m:ms) = case capturedKing c b m of
+    True -> True
+    False -> canCaptureKing c b ms
+
+capturedKing :: PieceColor -> Board -> Move -> Bool
+capturedKing c b m = case Extend.makeMove c b m of
+    (c', b') -> winningState c (c', b')
 
 prettyTurn :: PieceColor -> String
 prettyTurn White = "White"
@@ -54,7 +73,3 @@ prettyState (c, b, m) = prettyTurn c ++  "\n"  ++  Extend.prettyBoard b ++ "\n" 
 
 prettyMove::Move -> String
 prettyMove (piece, pos1, pos2) = (prettyPiece piece) ++ (prettyPos pos1) ++ ":" ++ (prettyPos pos2)
-
-
-
-
