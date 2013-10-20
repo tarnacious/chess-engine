@@ -24,6 +24,28 @@ direction::PieceColor->Int
 direction White = -1
 direction Black = 1
 
+pawnRow::PieceColor->Int
+pawnRow White = 6
+pawnRow Black = 7
+
+pawnAdvance::Board->Pos->Piece->[Pos]
+pawnAdvance b pos piece = case (pawnAtHome pos piece) && (pawnFirstRowEmpty b pos piece) && (pawnSecondRowEmpty b pos piece) of
+    True -> [pawnSecondRow pos piece]
+    False -> []
+
+pawnAtHome::Pos->Piece->Bool
+pawnAtHome (x, y) (Piece ptype color) = x == pawnRow(color)
+
+pawnFirstRowEmpty::Board->Pos->Piece->Bool
+pawnFirstRowEmpty b pos (Piece Pawn color) = empty b (addPair pos (direction color, 0))
+
+pawnSecondRowEmpty::Board->Pos->Piece->Bool
+pawnSecondRowEmpty board pos piece = empty board (pawnSecondRow pos piece)
+
+pawnSecondRow::Pos->Piece->Pos
+pawnSecondRow pos (Piece Pawn color) = addPair (addPair pos (direction color, 0)) (direction color, 0)
+
+
 -- move generator, simple pawn, no castling
 genMoves::Board->Pos->[Board]
 genMoves b pos = case getSquare b pos of
@@ -34,7 +56,8 @@ genPieceMoves::Board->Pos->Piece->[Pos]
 genPieceMoves b pos (Piece Knight f) = [coord|v<-moves Knight, let coord = addPair pos v, notColor b f coord]
 genPieceMoves b pos (Piece King f) = [coord|v<-moves King, let coord = addPair pos v, notColor b f coord]
 genPieceMoves b pos (Piece Pawn f) = (filter (empty b) [addPair pos (direction f, 0)]) ++
-                                     (filter (oppositePiece b f) (map (addPair pos) [(direction f, 1),(direction f, -1)]))
+                                     (filter (oppositePiece b f) (map (addPair pos) [(direction f, 1),(direction f, -1)])) ++
+                                     (pawnAdvance b pos (Piece Pawn f))
 genPieceMoves b pos (Piece x f) = concatMap (iterateDirection 1 pos b f) (moves x)
 
 notColor b f p      = inside p && not (hasColor f (getSquare b p))
