@@ -42,15 +42,15 @@ genColorMoves (c, b) = concat [[(piece,pos,z)|z<-genPieceMoves b pos piece]|(pie
 type Move = (Piece, Pos, Pos)
 
 makeMove::PieceColor -> Board -> Move -> (PieceColor, Board, [Move])
-makeMove c b (v,from,to) = 
-    ((oppositeColor c), movePos from to b, genColorMoves ((oppositeColor c), (movePos from to b))) 
+makeMove c b (v,from,to) =
+    ((oppositeColor c), movePos from to b, genColorMoves ((oppositeColor c), (movePos from to b)))
 
 prettyTurn :: PieceColor -> String
 prettyTurn White = "White"
 prettyTurn Black = "Black"
 
-prettyState :: (PieceColor, Board, [(Piece, Pos, Pos)]) -> String
-prettyState (c, b, m) = prettyTurn c ++  "\n"  ++  Extend.prettyBoard b ++ "\n" ++ (unwords $ [prettyMove m|m<-genColorMoves (c, b)])
+prettyState :: (PieceColor, Board, [Move]) -> String
+prettyState (c, b, m) = prettyTurn c ++  "\n"  ++  Extend.prettyBoard b ++ "\n" ++ (unwords $ [prettyMove m'|m'<-m]) ++ "\n"
 
 prettyMove::Move -> String
 prettyMove (piece, pos1, pos2) = (prettyPiece piece) ++ (prettyPos pos1) ++ ":" ++ (prettyPos pos2)
