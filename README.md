@@ -22,7 +22,7 @@ server.
 This is not intended to be and efficient implementation and Parsing into FEN or
 something might be better but this is for fun and learning.
 
-The ØMQ server has a on the ØMQ and the [Haskell bindings][haskellzeromq]
+The ØMQ server has a dependency on the ØMQ and the [Haskell bindings][haskellzeromq]
 
 To compile: 
 
